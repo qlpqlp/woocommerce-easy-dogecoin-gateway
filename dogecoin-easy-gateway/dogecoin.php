@@ -1,11 +1,15 @@
 <?php
-/*
-Plugin Name: Dogecoin Easy Gateway
-Plugin URI: https://github.com/qlpqlp/woocommerce-dogecoin-easy-payment
-Description: Acept Dogecoin Payments using simple your Dogecoin Address without the need of any third party payment processor, banks, extra fees | Your Store, your wallet, your Doge.
-Version: 69.420.0
-Author: inevitable360
-Author URI: https://github.com/qlpqlp
+/**
+ * Plugin Name: Dogecoin Easy Gateway
+ * Plugin URI: https://github.com/qlpqlp/woocommerce-dogecoin-easy-payment
+ * Description: Acept Dogecoin Payments using simple your Dogecoin Address without the need of any third party payment processor, banks, extra fees | Your Store, your wallet, your Doge.
+ * Version: 69.420.0
+ * Author: inevitable360
+ * Author URI: https://github.com/qlpqlp
+ * License:     GPL-2.0
+ * Requires PHP: 7.1
+ * WC requires at least: 3.9
+ * WC tested up to: 6.3
 */
 
 if ( ! in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) return;
