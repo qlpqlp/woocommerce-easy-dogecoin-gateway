@@ -1,16 +1,16 @@
 <?php
 /**
- * Plugin Name: Dogecoin Easy Gateway
- * Plugin URI: https://github.com/qlpqlp/woocommerce-dogecoin-easy-payment
+ * Plugin Name: Easy Dogecoin Gateway
+ * Plugin URI: https://github.com/qlpqlp/woocommerce-easy-dogecoin-payment
  * Description: Acept Dogecoin Payments using simple your Dogecoin Address without the need of any third party payment processor, banks, extra fees | Your Store, your wallet, your Doge.
- * Version: 69.420.0
  * Author: inevitable360
  * Author URI: https://github.com/qlpqlp
- * License:     GPL-2.0
- * Requires PHP: 7.1
- * WC requires at least: 3.9
- * WC tested up to: 6.3
-*/
+ * Version: 69.420.0
+ * Requires at least: 5.6
+ * Tested up to: 5.9
+ * WC requires at least: 5.7
+ * WC tested up to: 6.2
+ */
 
 if ( ! in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) return;
 
@@ -23,8 +23,8 @@ function easydoge_payment_init() {
                 $this->id   = 'easydoge_payment';
                 $this->icon = apply_filters( 'woocommerce_easydoge_icon', plugins_url('/assets/icon.svg', __FILE__ ) );
                 $this->has_fields = false;
-                $this->method_title = __( 'Dogecoin Easy Payment', 'easydoge-pay-woo');
-                $this->method_description = __( 'Dogecoin Easy payment.', 'easydoge-pay-woo');
+                $this->method_title = __( 'Easy Dogecoin Payment', 'easydoge-pay-woo');
+                $this->method_description = __( 'Easy Dogecoin payment.', 'easydoge-pay-woo');
 
                 $this->title = __( 'Dogecoin', 'easydoge-pay-woo');
                 $this->doge_address = $this->get_option( 'doge_address' );
@@ -73,8 +73,8 @@ function easydoge_payment_init() {
      * @return mixed
      */
     static public function convert_to_crypto($value, $from='usd') {
-
-      $price = json_decode(file_get_contents("https://api.coingecko.com/api/v3/coins/markets?vs_currency=".strtolower($from)."&ids=dogecoin&per_page=1&page=1&sparkline=false"));
+      $response = wp_remote_get("https://api.coingecko.com/api/v3/coins/markets?vs_currency=".strtolower(esc_html($from))."&ids=dogecoin&per_page=1&page=1&sparkline=false");
+      $price = json_decode($response["body"]);
       $response = $value / $price[0]->current_price;
       $response = number_format($response, 2, '.', '');
 
@@ -97,10 +97,7 @@ function easydoge_payment_init() {
       $total = WC()->cart->total;
       $woo_currency = get_woocommerce_currency();
       $total = $this->convert_to_crypto($total,$woo_currency);
-      ?>
-     <h2 style="font-weight: bold;">&ETH; <?php echo esc_html($total); ?></h2>
-      <input type="hidden" name="muchdoge" value="<?php echo esc_html($total); ?>" />
-      <?php
+      echo '<h2 style="font-weight: bold;">&ETH; ' . esc_html($total) . '</h2><input type="hidden" name="muchdoge" value="' . esc_html($total) . '" />';
     }
 
     /**
@@ -116,7 +113,7 @@ function easydoge_payment_init() {
       $redirect = get_permalink(wc_get_page_id('pay'));
       $redirect = add_query_arg('order', $order->id, $redirect);
       $redirect = add_query_arg('key', $order->order_key, $redirect);
-      $redirect = add_query_arg('muchdoge', sanitize_text_field($_POST['muchdoge']), $redirect);
+      $redirect = add_query_arg('muchdoge', sanitize_text_field(esc_html($_POST['muchdoge'])), $redirect);
       $order->reduce_order_stock();
 
       return array(
@@ -132,20 +129,7 @@ function easydoge_payment_init() {
      */
      public function receipt_page($order_id){
         $order = new WC_Order($order_id);
-?>
-      <div class="row">
-        <div style="border-top: 1px solid rgba(204, 153, 51, 1); border-top-left-radius: 15px; border-top-right-radius: 15px; padding: 10px"><?php echo $this->instructions; ?></div>
-      <div class="col" style="float:none;margin:auto; text-align: center;max-width: 425px; border: 2px solid rgba(204, 153, 0, 1); border-radius: 15px; padding: 10px;">
-        <div style="background-color: rgba(204, 153, 0, 1); padding: 10px; border-radius: 15px; border-bottom-left-radius: 0px; border-bottom-right-radius: 0px">
-           <h2 style="font-size: 20px; color: rgba(0, 0, 0, 1); font-weight: bold">Ð <?php echo $_GET['muchdoge']; ?></h2>
-        </div>
-           <img id="qrcode" src="//api.qrserver.com/v1/create-qr-code/?data=<?php echo $this->doge_address; ?>&amp;size=400x400" alt="" title="Such QR Code!" style="max-width: 400px !important"/>
-        <div style="background-color: rgba(204, 153, 0, 1); padding: 10px; border-radius: 15px; border-top-left-radius: 0px; border-top-right-radius: 0px; color: rgba(0, 0, 0, 1)">
-           <?php echo $this->doge_address; ?>
-        </div>
-      </div>
-      </div>
-<?php
+        echo '<div class="row"><div style="border-top: 1px solid rgba(204, 153, 51, 1); border-top-left-radius: 15px; border-top-right-radius: 15px; padding: 10px">' . esc_html($this->instructions) . '</div><div class="col" style="float:none;margin:auto; text-align: center;max-width: 425px; border: 2px solid rgba(204, 153, 0, 1); border-radius: 15px; padding: 10px;"><div style="background-color: rgba(204, 153, 0, 1); padding: 10px; border-radius: 15px; border-bottom-left-radius: 0px; border-bottom-right-radius: 0px"><h2 style="font-size: 20px; color: rgba(0, 0, 0, 1); font-weight: bold">Ð '. esc_html($_GET['muchdoge']) . '</h2></div><img id="qrcode" src="//chart.googleapis.com/chart?cht=qr&chs=400x400&chl=' . esc_html($this->doge_address) . '&amp;size=400x400" alt="" title="Such QR Code!" style="max-width: 400px !important"/><div style="background-color: rgba(204, 153, 0, 1); padding: 10px; border-radius: 15px; border-top-left-radius: 0px; border-top-right-radius: 0px; color: rgba(0, 0, 0, 1)">' . esc_html($this->doge_address) . '</div></div></div> ';
         $order->payment_complete();
         $order->update_status( 'on-hold',  __( 'Awaiting Dogecoin Payment Confirmation', 'easydoge-pay-woo') );
         WC()->cart->empty_cart();
@@ -160,20 +144,7 @@ function easydoge_payment_init() {
    * @param bool     $plain_text Email format: plain text or HTML.
    */
   public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
-  ?>
-      <div class="row">
-        <div style="border-top: 1px solid rgba(204, 153, 51, 1); border-top-left-radius: 15px; border-top-right-radius: 15px; padding: 10px"><?php echo $this->instructions; ?></div>
-      <div class="col" style="float:none;margin:auto; text-align: center;max-width: 425px; border: 2px solid rgba(204, 153, 0, 1); border-radius: 15px; padding: 10px;">
-        <div style="background-color: rgba(204, 153, 0, 1); padding: 10px; border-radius: 15px; border-bottom-left-radius: 0px; border-bottom-right-radius: 0px">
-           <h2 style="font-size: 20px; color: rgba(0, 0, 0, 1); font-weight: bold">Ð <?php echo $_GET['muchdoge']; ?></h2>
-        </div>
-           <img id="qrcode" src="https://api.qrserver.com/v1/create-qr-code/?data=<?php echo $this->doge_address; ?>&amp;size=400x400" alt="" title="Such QR Code!" style="max-width: 400px !important"/>
-        <div style="background-color: rgba(204, 153, 0, 1); padding: 10px; border-radius: 15px; border-top-left-radius: 0px; border-top-right-radius: 0px; color: rgba(0, 0, 0, 1)">
-           <?php echo $this->doge_address; ?>
-        </div>
-      </div>
-      </div>
-  <?php
+        echo '<div class="row"><div style="border-top: 1px solid rgba(204, 153, 51, 1); border-top-left-radius: 15px; border-top-right-radius: 15px; padding: 10px">' . esc_html($this->instructions) . '</div><div class="col" style="float:none;margin:auto; text-align: center;max-width: 425px; border: 2px solid rgba(204, 153, 0, 1); border-radius: 15px; padding: 10px;"><div style="background-color: rgba(204, 153, 0, 1); padding: 10px; border-radius: 15px; border-bottom-left-radius: 0px; border-bottom-right-radius: 0px"><h2 style="font-size: 20px; color: rgba(0, 0, 0, 1); font-weight: bold">Ð '. esc_html($_GET['muchdoge']) . '</h2></div><img id="qrcode" src="//chart.googleapis.com/chart?cht=qr&chs=400x400&chl=' . esc_html($this->doge_address) . '&amp;size=400x400" alt="" title="Such QR Code!" style="max-width: 400px !important"/><div style="background-color: rgba(204, 153, 0, 1); padding: 10px; border-radius: 15px; border-top-left-radius: 0px; border-top-right-radius: 0px; color: rgba(0, 0, 0, 1)">' . esc_html($this->doge_address) . '</div></div></div> ';
   }
 
         }
