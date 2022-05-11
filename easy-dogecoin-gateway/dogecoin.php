@@ -5,7 +5,7 @@
  * Description: Acept Dogecoin Payments using simple your Dogecoin Address without the need of any third party payment processor, banks, extra fees | Your Store, your wallet, your Doge.
  * Author: inevitable360
  * Author URI: https://github.com/qlpqlp
- * Version: 69.420.0
+ * Version: 69.420.1
  * Requires at least: 5.6
  * Tested up to: 5.9
  * WC requires at least: 5.7
@@ -28,6 +28,8 @@ function easydoge_payment_init() {
 
                 $this->title = __( 'Dogecoin', 'easydoge-pay-woo');
                 $this->doge_address = $this->get_option( 'doge_address' );
+                $this->mydoge_twitter_user = $this->get_option( 'mydoge_twitter_user' );
+                $this->sodoge_twitter_user = $this->get_option( 'sodoge_twitter_user' );
                 $this->instructions = $this->get_option( 'instructions' );
                 $this->description = $this->get_option( 'instructions' ); // field needed to display fields on client side
 
@@ -53,6 +55,20 @@ function easydoge_payment_init() {
                         'default' => __( 'DXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', 'easydoge-pay-woo'),
                         'desc_tip' => true,
                         'description' => __( 'This address will be shown to the client', 'easydoge-pay-woo')
+                    ),
+                    'mydoge_twitter_user' => array(
+                        'title' => __( 'Your Twitter user connected to MyDoge.com Wallet', 'easydoge-pay-woo'),
+                        'type' => 'text',
+                        'default' => __( '', 'easydoge-pay-woo'),
+                        'desc_tip' => true,
+                        'description' => __( 'If this field is filled, will display an option to pay using Twitter.com and you will be able to track Orders payments  also on Twitter', 'easydoge-pay-woo')
+                    ),
+                    'sodoge_twitter_user' => array(
+                        'title' => __( 'Your Twitter user connected to SoDogeTip.xyz Wallet', 'easydoge-pay-woo'),
+                        'type' => 'text',
+                        'default' => __( '', 'easydoge-pay-woo'),
+                        'desc_tip' => true,
+                        'description' => __( 'If this field is filled, will display an option to pay using Twitter.com and you will be able to track Orders payments  also on Twitter', 'easydoge-pay-woo')
                     ),
                     'instructions' => array(
                         'title' => __( 'Instructions for the client to pay in Dogecoin', 'easydoge-pay-woo'),
@@ -129,7 +145,28 @@ function easydoge_payment_init() {
      */
      public function receipt_page($order_id){
         $order = new WC_Order($order_id);
-        echo '<div class="row"><div style="border-top: 1px solid rgba(204, 153, 51, 1); border-top-left-radius: 15px; border-top-right-radius: 15px; padding: 10px">' . esc_html($this->instructions) . '</div><div class="col" style="float:none;margin:auto; text-align: center;max-width: 425px; border: 2px solid rgba(204, 153, 0, 1); border-radius: 15px; padding: 10px;"><div style="background-color: rgba(204, 153, 0, 1); padding: 10px; border-radius: 15px; border-bottom-left-radius: 0px; border-bottom-right-radius: 0px"><h2 style="font-size: 20px; color: rgba(0, 0, 0, 1); font-weight: bold">Ð '. esc_html($_GET['muchdoge']) . '</h2></div><img id="qrcode" src="//chart.googleapis.com/chart?cht=qr&chs=400x400&chl=' . esc_html($this->doge_address) . '&amp;size=400x400" alt="" title="Such QR Code!" style="max-width: 400px !important"/><div style="background-color: rgba(204, 153, 0, 1); padding: 10px; border-radius: 15px; border-top-left-radius: 0px; border-top-right-radius: 0px; color: rgba(0, 0, 0, 1)">' . esc_html($this->doge_address) . '</div></div></div> ';
+        if (trim($this->mydoge_twitter_user) != "" or trim($this->mydoge_twitter_user) != ""){
+            echo '<div class="row"><div style="border-top: 5px solid  rgba(51, 153, 255, 1); border-top-left-radius: 15px; border-top-right-radius: 15px; padding: 10px"><div style="text-align: center">'.__( 'Pay directly in Dogecoin using <b>Twitter</b> Doge Wallet Bots!', 'easydoge-pay-woo').'</div>';
+        };
+
+        if (trim($this->mydoge_twitter_user) != ""){
+            $mydoge_pay = "%0a%0a🥳🎉🐶🔥🚀%0a@mydoge%20tip%20".trim($this->mydoge_twitter_user)."%20".esc_html($_GET['muchdoge'])."%20Doge%20";
+            $mydoge_wallet_link = 'https://twitter.com/intent/tweet?text='.trim($this->mydoge_twitter_user).'%20 TwitterPay Order id:'.$order_id.$mydoge_pay.'%0a%0a'.get_site_url().'%0a&hashtags=Doge,Dogecoin';
+            echo '<a href="'.$mydoge_wallet_link.'" target="_blank" style="padding: 15px"><div style="background: rgba(51, 153, 255, 1); border-radius: 15px; color: rgba(255, 255, 255, 1); background-image: url('.plugins_url('/assets/twitter.png', __FILE__ ).'); background-repeat: no-repeat; background-position: center left 15px; text-align: center"><img src="'.plugins_url('/assets/mydoge.png', __FILE__ ).'" style="padding: 10px; display: inline; min-height: 50px"></div></a>';
+        };
+
+        if (trim($this->sodoge_twitter_user) != ""){
+            $sodoge_pay = "%0a%0a🥳🎉🐶🔥🚀%0a@sodogetip%20tip%20".trim($this->sodoge_twitter_user)."%20".esc_html($_GET['muchdoge'])."%20Doge%20";
+            $sodoge_wallet_link = 'https://twitter.com/intent/tweet?text='.trim($this->mydoge_twitter_user).'%20 TwitterPay Order id:'.$order_id.$sodoge_pay.'%0a%0a'.get_site_url().'%0a&hashtags=Doge,Dogecoin';
+            echo '<a href="'.$sodoge_wallet_link.'" target="_blank" style="padding: 15px"><div style="background: rgba(51, 153, 255, 1); border-radius: 15px; color: rgba(255, 255, 255, 1); background-image: url('.plugins_url('/assets/twitter.png', __FILE__ ).'); background-repeat: no-repeat; background-position: center left 15px; text-align: center"><img src="'.plugins_url('/assets/sodoge.png', __FILE__ ).'" style="padding: 10px; display: inline; min-height: 50px"></div></a>';
+        };
+
+        if (trim($this->mydoge_twitter_user) != "" or trim($this->mydoge_twitter_user) != ""){
+            echo '</div></div>';
+        };
+
+        echo '<div class="row"><div style="border-top: 5px solid rgba(204, 153, 51, 1); border-top-left-radius: 15px; border-top-right-radius: 15px; padding: 10px">' . esc_html($this->instructions) . '</div><div class="col" style="float:none;margin:auto; text-align: center;max-width: 425px; border: 2px solid rgba(204, 153, 0, 1); border-radius: 15px; padding: 10px;"><div style="background-color: rgba(204, 153, 0, 1); padding: 10px; border-radius: 15px; border-bottom-left-radius: 0px; border-bottom-right-radius: 0px"><h2 style="font-size: 20px; color: rgba(0, 0, 0, 1); font-weight: bold">Ð '. esc_html($_GET['muchdoge']) . '</h2></div><img id="qrcode" src="//chart.googleapis.com/chart?cht=qr&chs=400x400&chl=' . esc_html($this->doge_address) . '&amp;size=400x400" alt="" title="Such QR Code!" style="max-width: 400px !important"/><div style="background-color: rgba(204, 153, 0, 1); padding: 10px; border-radius: 15px; border-top-left-radius: 0px; border-top-right-radius: 0px; color: rgba(0, 0, 0, 1)">' . esc_html($this->doge_address) . '</div></div></div> ';
+
         $order->payment_complete();
         $order->update_status( 'on-hold',  __( 'Awaiting Dogecoin Payment Confirmation', 'easydoge-pay-woo') );
         WC()->cart->empty_cart();
@@ -144,7 +181,26 @@ function easydoge_payment_init() {
    * @param bool     $plain_text Email format: plain text or HTML.
    */
   public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
-        echo '<div class="row"><div style="border-top: 1px solid rgba(204, 153, 51, 1); border-top-left-radius: 15px; border-top-right-radius: 15px; padding: 10px">' . esc_html($this->instructions) . '</div><div class="col" style="float:none;margin:auto; text-align: center;max-width: 425px; border: 2px solid rgba(204, 153, 0, 1); border-radius: 15px; padding: 10px;"><div style="background-color: rgba(204, 153, 0, 1); padding: 10px; border-radius: 15px; border-bottom-left-radius: 0px; border-bottom-right-radius: 0px"><h2 style="font-size: 20px; color: rgba(0, 0, 0, 1); font-weight: bold">Ð '. esc_html($_GET['muchdoge']) . '</h2></div><img id="qrcode" src="//chart.googleapis.com/chart?cht=qr&chs=400x400&chl=' . esc_html($this->doge_address) . '&amp;size=400x400" alt="" title="Such QR Code!" style="max-width: 400px !important"/><div style="background-color: rgba(204, 153, 0, 1); padding: 10px; border-radius: 15px; border-top-left-radius: 0px; border-top-right-radius: 0px; color: rgba(0, 0, 0, 1)">' . esc_html($this->doge_address) . '</div></div></div> ';
+        if (trim($this->mydoge_twitter_user) != "" or trim($this->mydoge_twitter_user) != ""){
+            echo '<div class="row"><div style="border-top: 5px solid  rgba(51, 153, 255, 1); border-top-left-radius: 15px; border-top-right-radius: 15px; padding: 10px"><div style="text-align: center">'.__( 'Pay directly in Dogecoin using <b>Twitter</b> Doge Wallet Bots!', 'easydoge-pay-woo').'</div>';
+        };
+
+        if (trim($this->mydoge_twitter_user) != ""){
+            $mydoge_pay = "%0a%0a🥳🎉🐶🔥🚀%0a@mydoge%20tip%20".trim($this->mydoge_twitter_user)."%20".esc_html($_GET['muchdoge'])."%20Doge%20";
+            $mydoge_wallet_link = 'https://twitter.com/intent/tweet?text='.trim($this->mydoge_twitter_user).'%20 TwitterPay Order id:'.$order->id.$mydoge_pay.'%0a%0a'.get_site_url().'%0a&hashtags=Doge,Dogecoin';
+            echo '<a href="'.$mydoge_wallet_link.'" target="_blank" style="padding: 15px"><div style="background: rgba(51, 153, 255, 1); border-radius: 15px; color: rgba(255, 255, 255, 1); background-image: url('.plugins_url('/assets/twitter.png', __FILE__ ).'); background-repeat: no-repeat; background-position: center left 15px; text-align: center"><img src="'.plugins_url('/assets/mydoge.png', __FILE__ ).'" style="padding: 10px; display: inline; min-height: 50px"></div></a>';
+        };
+
+        if (trim($this->sodoge_twitter_user) != ""){
+            $sodoge_pay = "%0a%0a🥳🎉🐶🔥🚀%0a@sodogetip%20tip%20".trim($this->sodoge_twitter_user)."%20".esc_html($_GET['muchdoge'])."%20Doge%20";
+            $sodoge_wallet_link = 'https://twitter.com/intent/tweet?text='.trim($this->mydoge_twitter_user).'%20 TwitterPay Order id:'.$order->id.$sodoge_pay.'%0a%0a'.get_site_url().'%0a&hashtags=Doge,Dogecoin';
+            echo '<a href="'.$sodoge_wallet_link.'" target="_blank" style="padding: 15px"><div style="background: rgba(51, 153, 255, 1); border-radius: 15px; color: rgba(255, 255, 255, 1); background-image: url('.plugins_url('/assets/twitter.png', __FILE__ ).'); background-repeat: no-repeat; background-position: center left 15px; text-align: center"><img src="'.plugins_url('/assets/sodoge.png', __FILE__ ).'" style="padding: 10px; display: inline; min-height: 50px"></div></a>';
+        };
+
+        if (trim($this->mydoge_twitter_user) != "" or trim($this->mydoge_twitter_user) != ""){
+            echo '</div></div>';
+        };
+        echo '<div class="row"><div style="border-top: 5px solid rgba(204, 153, 51, 1); border-top-left-radius: 15px; border-top-right-radius: 15px; padding: 10px">' . esc_html($this->instructions) . '</div><div class="col" style="float:none;margin:auto; text-align: center;max-width: 425px; border: 2px solid rgba(204, 153, 0, 1); border-radius: 15px; padding: 10px;"><div style="background-color: rgba(204, 153, 0, 1); padding: 10px; border-radius: 15px; border-bottom-left-radius: 0px; border-bottom-right-radius: 0px"><h2 style="font-size: 20px; color: rgba(0, 0, 0, 1); font-weight: bold">Ð '. esc_html($_GET['muchdoge']) . '</h2></div><img id="qrcode" src="//chart.googleapis.com/chart?cht=qr&chs=400x400&chl=' . esc_html($this->doge_address) . '&amp;size=400x400" alt="" title="Such QR Code!" style="max-width: 400px !important"/><div style="background-color: rgba(204, 153, 0, 1); padding: 10px; border-radius: 15px; border-top-left-radius: 0px; border-top-right-radius: 0px; color: rgba(0, 0, 0, 1)">' . esc_html($this->doge_address) . '</div></div></div> ';
   }
 
         }
