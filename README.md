@@ -13,6 +13,6 @@ DogeGarden
 
 3- Now navigate into your Wordpress Backoffice and go to ```Plugins```->```Installed``` and click on ```Activate```
 
-4- Navigate to ```Woocommerce```->```Settings```->```Payments``` and Activate the ```Dogecoin Easy Payment``` and click on ```Manage``` to set up your Dogecoin Address and instructions
+4- Navigate to ```Woocommerce```->```Settings```->```Payments``` and Activate the ```Easy Dogecoin Gateway``` and click on ```Manage``` to set up your Dogecoin Address and instructions
 
 enjoys your sells in Dogecoin with auto convert Fiat prices into Doge :P
