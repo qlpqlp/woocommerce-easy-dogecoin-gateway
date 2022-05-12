@@ -5,7 +5,7 @@
  * Description: Acept Dogecoin Payments using simple your Dogecoin Address without the need of any third party payment processor, banks, extra fees | Your Store, your wallet, your Doge.
  * Author: inevitable360
  * Author URI: https://github.com/qlpqlp
- * Version: 69.420.1
+ * Version: 69.420.2
  * Requires at least: 5.6
  * Tested up to: 5.9
  * WC requires at least: 5.7
@@ -150,7 +150,7 @@ function easydoge_payment_init() {
         };
 
         if (trim($this->mydoge_twitter_user) != ""){
-            $mydoge_pay = "%0a%0a🥳🎉🐶🔥🚀%0a@mydoge%20tip%20".trim($this->mydoge_twitter_user)."%20".esc_html($_GET['muchdoge'])."%20Doge%20";
+            $mydoge_pay = "%0a%0a🥳🎉🐶🔥🚀%0a@MyDogeTip%20tip%20".trim($this->mydoge_twitter_user)."%20".esc_html($_GET['muchdoge'])."%20Doge%20";
             $mydoge_wallet_link = 'https://twitter.com/intent/tweet?text='.trim($this->mydoge_twitter_user).'%20 TwitterPay Order id:'.$order_id.$mydoge_pay.'%0a%0a'.get_site_url().'%0a&hashtags=Doge,Dogecoin';
             echo '<a href="'.$mydoge_wallet_link.'" target="_blank" style="padding: 15px"><div style="background: rgba(51, 153, 255, 1); border-radius: 15px; color: rgba(255, 255, 255, 1); background-image: url('.plugins_url('/assets/twitter.png', __FILE__ ).'); background-repeat: no-repeat; background-position: center left 15px; text-align: center"><img src="'.plugins_url('/assets/mydoge.png', __FILE__ ).'" style="padding: 10px; display: inline; min-height: 50px"></div></a>';
         };
@@ -186,7 +186,7 @@ function easydoge_payment_init() {
         };
 
         if (trim($this->mydoge_twitter_user) != ""){
-            $mydoge_pay = "%0a%0a🥳🎉🐶🔥🚀%0a@mydoge%20tip%20".trim($this->mydoge_twitter_user)."%20".esc_html($_GET['muchdoge'])."%20Doge%20";
+            $mydoge_pay = "%0a%0a🥳🎉🐶🔥🚀%0a@MyDogeTip%20tip%20".trim($this->mydoge_twitter_user)."%20".esc_html($_GET['muchdoge'])."%20Doge%20";
             $mydoge_wallet_link = 'https://twitter.com/intent/tweet?text='.trim($this->mydoge_twitter_user).'%20 TwitterPay Order id:'.$order->id.$mydoge_pay.'%0a%0a'.get_site_url().'%0a&hashtags=Doge,Dogecoin';
             echo '<a href="'.$mydoge_wallet_link.'" target="_blank" style="padding: 15px"><div style="background: rgba(51, 153, 255, 1); border-radius: 15px; color: rgba(255, 255, 255, 1); background-image: url('.plugins_url('/assets/twitter.png', __FILE__ ).'); background-repeat: no-repeat; background-position: center left 15px; text-align: center"><img src="'.plugins_url('/assets/mydoge.png', __FILE__ ).'" style="padding: 10px; display: inline; min-height: 50px"></div></a>';
         };

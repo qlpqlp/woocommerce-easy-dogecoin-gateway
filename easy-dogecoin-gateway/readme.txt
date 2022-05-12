@@ -4,7 +4,7 @@ Donate link: https://twitter.com/inevitable360
 Tags: easy dogecoin gateway, doge, dogecoin, crypto, cryptocurrency, woocommerce, ecommerce, online-store
 Requires at least: 5.6
 Tested up to: 5.9
-Stable tag: 69.420.1
+Stable tag: 69.420.2
 Requires PHP: 7.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -40,10 +40,13 @@ You can mine Doge using an ASIC computer or you can buy Doge with Fiat money (Do
 
 == Changelog ==
 
-= 420.69.1 =
+= 69.420.2 =
+* Fixed typo on MyDoge wallet command
+
+= 69.420.1 =
 * Added Dogecoin Twitter Payment using MyDoge.com and sodogetip.xyz wallets
 
-= 420.69.0 =
+= 69.420.0 =
 * First release
 
 Unordered list:
