@@ -1,7 +1,7 @@
 <h1 align="center">
 Easy Dogecoin Gateway for Wordpress/Woocommerce
 <br><br>
-<img src="https://dogegarden.io/img/woocommerce.png" alt="Acept Dogecoin Payments using simple your Dogecoin Address without the need of any third party payment processor, banks, extra fees | Your Store, your wallet, your Doge."/>
+<img src="https://dogegarden.com/img/woocommerce.png" alt="Accept Dogecoin Payments using simple your Dogecoin Address without the need of any third party payment processor, banks, extra fees | Your Store, your wallet, your Doge."/>
 <br><br>
 </h1>
 

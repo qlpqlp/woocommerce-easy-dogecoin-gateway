@@ -3,11 +3,12 @@ Contributors: inevitable360
 Donate link: https://twitter.com/inevitable360
 Tags: easy dogecoin gateway, doge, dogecoin, crypto, cryptocurrency, woocommerce, ecommerce, online-store
 Requires at least: 5.6
-Tested up to: 5.9
-Stable tag: 69.420.2
+Tested up to: 6.5.5
+Stable tag: 69.420.6
 Requires PHP: 7.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
+
 
 Acept Dogecoin Payments using simple your Dogecoin Address or your own Twitter account without the need of any third party payment processor, banks, extra fees.
 
@@ -39,6 +40,21 @@ You can mine Doge using an ASIC computer or you can buy Doge with Fiat money (Do
 1. Dogecoin Payment option screenshot-1.png
 
 == Changelog ==
+
+= 69.420.6 =
+* Fixed Bug wen using multiple payment methods
+* Removed Twitter added X logo
+* Remoded Google QR Dependencies and Added fetch.dogecoin.org for QR generator
+
+= 69.420.5 =
+* Tested on latest version of Wordpress
+
+= 69.420.4 =
+* Fixed bugs
+
+= 69.420.3 =
+* Ui Improvments
+* Added conversion from fiat to Doge
 
 = 69.420.2 =
 * Fixed typo on MyDoge wallet command
