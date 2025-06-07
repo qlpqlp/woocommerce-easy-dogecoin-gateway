@@ -6,11 +6,11 @@
  * Description: Accept Dogecoin Payments using simple your Dogecoin Address without the need of any third party payment processor, banks, extra fees | Your Store, your wallet, your Doge.
  * Author: Dogecoin Foundation
  * Author URI: https://foundation.dogecoin.com
- * Version: 69.420.6
+ * Version: 69.420.7
  * Requires at least: 5.6
- * Tested up to: 6.5.5
+ * Tested up to: 6.8.1
  * WC requires at least: 5.7
- * WC tested up to: 9.0.2
+ * WC tested up to: 9.8.5
  */
 
 if ( ! in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) return;

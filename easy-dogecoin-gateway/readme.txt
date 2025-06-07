@@ -3,8 +3,8 @@ Contributors: inevitable360
 Donate link: https://twitter.com/inevitable360
 Tags: easy dogecoin gateway, doge, dogecoin, crypto, cryptocurrency, woocommerce, ecommerce, online-store
 Requires at least: 5.6
-Tested up to: 6.5.5
-Stable tag: 69.420.6
+Tested up to: 6.8.1
+Stable tag: 69.420.7
 Requires PHP: 7.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
