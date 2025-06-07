@@ -11,9 +11,20 @@
  * Tested up to: 6.8.1
  * WC requires at least: 5.7
  * WC tested up to: 9.8.5
+ * Requires PHP: 7.0
+ * Woo: 12345:342928dfsfhsf2349842374wdf4234sfd
+ * WooCommerce: true
+ * WooCommerce HPOS: true
  */
 
 if ( ! in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) return;
+
+// Declare HPOS compatibility
+add_action( 'before_woocommerce_init', function() {
+    if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+    }
+});
 
 add_action( 'plugins_loaded', 'easydoge_payment_init', 11 );
 add_filter( 'woocommerce_currencies', 'bc_add_new_currency' );
