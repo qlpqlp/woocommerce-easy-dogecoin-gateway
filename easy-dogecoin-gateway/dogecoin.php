@@ -6,18 +6,21 @@
  * Description: Accept Dogecoin Payments using simple your Dogecoin Address without the need of any third party payment processor, banks, extra fees | Your Store, your wallet, your Doge.
  * Author: Dogecoin Foundation
  * Author URI: https://foundation.dogecoin.com
- * Version: 69.420.7
+ * Version: 69.420.8
  * Requires at least: 5.6
- * Tested up to: 6.8.1
+ * Tested up to: 6.8.2
  * WC requires at least: 5.7
- * WC tested up to: 9.8.5
+ * WC tested up to: 10.1.2
  * Requires PHP: 7.0
  * Woo: 12345:342928dfsfhsf2349842374wdf4234sfd
  * WooCommerce: true
  * WooCommerce HPOS: true
  */
 
-if ( ! in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) return;
+// Check if WooCommerce is active
+if ( ! in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
+    return;
+}
 
 // Declare HPOS compatibility
 add_action( 'before_woocommerce_init', function() {
@@ -26,7 +29,8 @@ add_action( 'before_woocommerce_init', function() {
     }
 });
 
-add_action( 'plugins_loaded', 'easydoge_payment_init', 11 );
+// Ensure WooCommerce is fully loaded before initializing
+add_action( 'woocommerce_init', 'easydoge_payment_init' );
 add_filter( 'woocommerce_currencies', 'bc_add_new_currency' );
 add_filter( 'woocommerce_currency_symbol', 'bc_add_new_currency_symbol', 10, 2 );
 add_action( 'wp_head', 'add_doge_qr_script' );
@@ -52,6 +56,11 @@ function bc_add_new_currency_symbol( $symbol, $currency ) {
 
 
 function easydoge_payment_init() {
+    // Debug logging for WordPress.com
+    if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+        error_log( 'Easy Dogecoin Gateway: Initializing payment gateway' );
+    }
+    
     if( class_exists( 'WC_Payment_Gateway' ) ) {
         class WC_EasyDoge_Gateway extends WC_Payment_Gateway {
             public function __construct() {
@@ -149,10 +158,22 @@ function easydoge_payment_init() {
              * @return void
              */
             function payment_fields() {
-            $total = WC()->cart->total;
-            $woo_currency = get_woocommerce_currency();
-            $total = $this->convert_to_crypto($total,$woo_currency);
-            echo '<h2 style="font-weight: bold;">&ETH; ' . esc_html($total) . '</h2><input type="hidden" name="muchdoge" value="' . esc_html($total) . '" />';
+                // Check if WooCommerce is available
+                if ( ! function_exists( 'WC' ) || ! WC() || ! WC()->cart ) {
+                    echo '<p>' . __( 'WooCommerce is not available. Please refresh the page.', 'easydoge-pay-woo' ) . '</p>';
+                    return;
+                }
+                
+                $total = WC()->cart->total;
+                $woo_currency = get_woocommerce_currency();
+                
+                // Fallback if currency detection fails
+                if ( empty( $woo_currency ) ) {
+                    $woo_currency = 'USD';
+                }
+                
+                $total = $this->convert_to_crypto($total, $woo_currency);
+                echo '<h2 style="font-weight: bold;">&ETH; ' . esc_html($total) . '</h2><input type="hidden" name="muchdoge" value="' . esc_html($total) . '" />';
             }
 
             /**
@@ -162,19 +183,30 @@ function easydoge_payment_init() {
              * @return array
              */
             function process_payment($order_id) {
-            $order = new WC_Order($order_id);
+                // Check if WooCommerce is available
+                if ( ! function_exists( 'WC' ) || ! WC() ) {
+                    wc_add_notice( __( 'WooCommerce is not available. Please try again.', 'easydoge-pay-woo' ), 'error' );
+                    return array( 'result' => 'failure' );
+                }
+                
+                $order = wc_get_order($order_id);
+                
+                if ( ! $order ) {
+                    wc_add_notice( __( 'Order not found. Please try again.', 'easydoge-pay-woo' ), 'error' );
+                    return array( 'result' => 'failure' );
+                }
 
-            // Create redirect URL
-            $redirect = get_permalink(wc_get_page_id('pay'));
-            $redirect = add_query_arg('order', $order->id, $redirect);
-            $redirect = add_query_arg('key', $order->order_key, $redirect);
-            $redirect = add_query_arg('muchdoge', sanitize_text_field(esc_html($_POST['muchdoge'])), $redirect);
-            $order->reduce_order_stock();
+                // Create redirect URL
+                $redirect = get_permalink(wc_get_page_id('pay'));
+                $redirect = add_query_arg('order', $order->get_id(), $redirect);
+                $redirect = add_query_arg('key', $order->get_order_key(), $redirect);
+                $redirect = add_query_arg('muchdoge', sanitize_text_field(esc_html($_POST['muchdoge'])), $redirect);
+                $order->reduce_order_stock();
 
-            return array(
-                'result'    => 'success',
-                'redirect'  => $redirect,
-            );
+                return array(
+                    'result'    => 'success',
+                    'redirect'  => $redirect,
+                );
             }
 
             /**
@@ -183,7 +215,12 @@ function easydoge_payment_init() {
              * @return void
              */
             public function receipt_page($order_id) {
-                $order = new WC_Order($order_id);
+                $order = wc_get_order($order_id);
+                
+                if ( ! $order ) {
+                    echo '<p>' . __( 'Order not found.', 'easydoge-pay-woo' ) . '</p>';
+                    return;
+                }
         
                 echo '<p style="text-align: center"><img style="margin:auto" src="'.plugins_url('/assets/wow.gif', __FILE__ ).'" alt="wow" /></p>';
         
@@ -243,9 +280,23 @@ function easydoge_payment_init() {
     }
 }
 
-  add_filter( 'woocommerce_payment_gateways', 'add_to_woo_easydoge_payment_gateway');
+add_filter( 'woocommerce_payment_gateways', 'add_to_woo_easydoge_payment_gateway');
 
-  function add_to_woo_easydoge_payment_gateway( $gateways ) {
-      $gateways[] = 'WC_EasyDoge_Gateway';
-      return $gateways;
-  }
+function add_to_woo_easydoge_payment_gateway( $gateways ) {
+    // Debug logging
+    if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+        error_log( 'Easy Dogecoin Gateway: Adding gateway to WooCommerce gateways list' );
+    }
+    
+    $gateways[] = 'WC_EasyDoge_Gateway';
+    return $gateways;
+}
+
+// Add admin notice if gateway is not showing up
+add_action( 'admin_notices', 'easydoge_admin_notices' );
+
+function easydoge_admin_notices() {
+    if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
+        echo '<div class="notice notice-error"><p>' . __( 'Easy Dogecoin Gateway requires WooCommerce to be installed and active.', 'easydoge-pay-woo' ) . '</p></div>';
+    }
+}

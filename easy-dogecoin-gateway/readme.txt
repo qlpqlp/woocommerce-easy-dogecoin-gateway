@@ -3,8 +3,8 @@ Contributors: inevitable360
 Donate link: https://twitter.com/inevitable360
 Tags: easy dogecoin gateway, doge, dogecoin, crypto, cryptocurrency, woocommerce, ecommerce, online-store
 Requires at least: 5.6
-Tested up to: 6.8.1
-Stable tag: 69.420.7
+Tested up to: 6.8.2
+Stable tag: 69.420.8
 Requires PHP: 7.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -40,6 +40,13 @@ You can mine Doge using an ASIC computer or you can buy Doge with Fiat money (Do
 1. Dogecoin Payment option screenshot-1.png
 
 == Changelog ==
+
+= 69.420.8 =
+* Code improvments for Wordpress 6.8.2
+* Code improvments for Woocommerce 10.1.2
+
+= 69.420.7 =
+* Code improvments for Wordpress 6.8.0
 
 = 69.420.6 =
 * Fixed Bug wen using multiple payment methods
