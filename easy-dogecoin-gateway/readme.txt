@@ -1,20 +1,20 @@
-=== Plugin Name ===
+=== Easy Dogecoin Gateway ===
 Contributors: inevitable360
-Donate link: https://twitter.com/inevitable360
-Tags: easy dogecoin gateway, doge, dogecoin, crypto, cryptocurrency, woocommerce, ecommerce, online-store
+Donate link: https://x.com/inevitable360
+Tags: dogecoin, woocommerce, payments, cryptocurrency, gateway
 Requires at least: 5.6
-Tested up to: 6.8.2
-Stable tag: 69.420.8
+Tested up to: 6.9.4
+Stable tag: 69.420.9
 Requires PHP: 7.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 
-Acept Dogecoin Payments using simple your Dogecoin Address or your own Twitter account without the need of any third party payment processor, banks, extra fees.
+Accept Dogecoin payments in WooCommerce using your own Dogecoin address. No payment processor, no extra fees.
 
 == Description ==
 
-Accept Dogecoin Payments simply by using your Dogecoin Address or your Twitter account connected to the MyDoge.com or sodogetip.xyz Wallets without the need of any third party payment processor, banks or extra fees. Your store, your wallet, your Doge.
+Accept Dogecoin Payments simply by using your Dogecoin Address or your X account connected to the MyDoge.com or sodogetip.xyz Wallets without the need of any third party payment processor, banks or extra fees. Your store, your wallet, your Doge.
 It uses the Google API to generate QR Codes and the CoinGecko API to convert Fiat into Dogecoin current value.
 
 == Frequently Asked Questions ==
@@ -40,6 +40,12 @@ You can mine Doge using an ASIC computer or you can buy Doge with Fiat money (Do
 1. Dogecoin Payment option screenshot-1.png
 
 == Changelog ==
+
+= 69.420.9 =
+* Fixed PHP 8.2 deprecation warnings by declaring previously dynamic properties.
+* Updated WooCommerce redirect flow to avoid the deprecated `order` query var.
+* Modernized the checkout QR/address/buttons UI with neutral styling and improved consistency.
+* Tested with latest WordPress/WooCommerce and PHP 8.2.
 
 = 69.420.8 =
 * Code improvments for Wordpress 6.8.2

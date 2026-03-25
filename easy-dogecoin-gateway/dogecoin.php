@@ -6,11 +6,11 @@
  * Description: Accept Dogecoin Payments using simple your Dogecoin Address without the need of any third party payment processor, banks, extra fees | Your Store, your wallet, your Doge.
  * Author: Dogecoin Foundation
  * Author URI: https://foundation.dogecoin.com
- * Version: 69.420.8
+ * Version: 69.420.9
  * Requires at least: 5.6
- * Tested up to: 6.8.2
+ * Tested up to: 6.9.4
  * WC requires at least: 5.7
- * WC tested up to: 10.1.2
+ * WC tested up to: 10.6.1
  * Requires PHP: 7.0
  * Woo: 12345:342928dfsfhsf2349842374wdf4234sfd
  * WooCommerce: true
@@ -63,6 +63,12 @@ function easydoge_payment_init() {
     
     if( class_exists( 'WC_Payment_Gateway' ) ) {
         class WC_EasyDoge_Gateway extends WC_Payment_Gateway {
+            // PHP 8.2+: declare properties to avoid deprecated dynamic property creation.
+            public $doge_address = '';
+            public $mydoge_x_user = '';
+            public $sodoge_x_user = '';
+            public $instructions = '';
+
             public function __construct() {
                 $this->id   = 'easydoge_payment';
                 $this->icon = apply_filters( 'woocommerce_easydoge_icon', plugins_url('/assets/icon.svg', __FILE__ ) );
@@ -196,11 +202,31 @@ function easydoge_payment_init() {
                     return array( 'result' => 'failure' );
                 }
 
+                $muchdoge = isset( $_POST['muchdoge'] ) ? sanitize_text_field( wp_unslash( $_POST['muchdoge'] ) ) : '';
+
                 // Create redirect URL
-                $redirect = get_permalink(wc_get_page_id('pay'));
-                $redirect = add_query_arg('order', $order->get_id(), $redirect);
-                $redirect = add_query_arg('key', $order->get_order_key(), $redirect);
-                $redirect = add_query_arg('muchdoge', sanitize_text_field(esc_html($_POST['muchdoge'])), $redirect);
+                // Woo 2.1+ deprecates passing order IDs to the `woocommerce_checkout` shortcode via `order`.
+                // Redirect to the order-pay endpoint so Woo can infer the order without the deprecated `order` query var.
+                $redirect = '';
+                if ( function_exists( 'wc_get_endpoint_url' ) ) {
+                    // Base URL doesn't matter much; endpoint URL builder will append the correct structure.
+                    $base_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : get_permalink( wc_get_page_id( 'pay' ) );
+                    $redirect = wc_get_endpoint_url( 'order-pay', $order_id, $base_url );
+                }
+
+                if ( empty( $redirect ) ) {
+                    if ( method_exists( $order, 'get_checkout_payment_url' ) ) {
+                        $redirect = $order->get_checkout_payment_url();
+                    } else {
+                        // Last resort fallback (older Woo versions).
+                        $redirect = get_permalink( wc_get_page_id( 'pay' ) );
+                        $redirect = add_query_arg( 'key', $order->get_order_key(), $redirect );
+                    }
+                } else {
+                    $redirect = add_query_arg( 'key', $order->get_order_key(), $redirect );
+                }
+
+                $redirect = add_query_arg( 'muchdoge', $muchdoge, $redirect );
                 $order->reduce_order_stock();
 
                 return array(
@@ -221,35 +247,98 @@ function easydoge_payment_init() {
                     echo '<p>' . __( 'Order not found.', 'easydoge-pay-woo' ) . '</p>';
                     return;
                 }
+
+                $muchdoge = isset( $_GET['muchdoge'] ) ? sanitize_text_field( wp_unslash( $_GET['muchdoge'] ) ) : '';
         
+                echo '<style>
+                    .easydoge-wrap{max-width:560px;margin:0 auto;}
+                    .easydoge-card{background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.08);overflow:hidden;}
+                    .easydoge-instructions{background:rgba(17,24,39,.04);border-top:5px solid rgba(148,163,184,1);padding:14px 16px;font-weight:600;text-align:center;color:#111827;}
+                    .easydoge-amount{background:rgba(243,244,246,1);padding:14px 16px;color:#111827;text-align:center;font-weight:800;font-size:20px;}
+                    .easydoge-qr{padding:14px 16px;text-align:center;}
+                    .easydoge-address-row{padding:10px 16px 16px;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;background:#f9fafb;border-top:1px solid rgba(0,0,0,.06);}
+                    .easydoge-address{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:15px;word-break:break-all;padding:10px 12px;border-radius:12px;background:#fff;border:1px dashed rgba(100,116,139,.55);}
+                    .easydoge-copy-btn{border:0;border-radius:12px;padding:10px 14px;background:#111827;color:#fff;font-weight:700;cursor:pointer;}
+                    .easydoge-copy-btn:hover{opacity:.95}
+                    .easydoge-btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border-radius:14px;padding:12px 16px;font-weight:800;width:100%;max-width:320px;margin:0 auto;box-shadow:0 6px 18px rgba(0,0,0,.10);background:linear-gradient(135deg,#e5e7eb,#cbd5e1);color:#0f172a;border:1px solid rgba(148,163,184,.55);}
+                    .easydoge-x-section{margin-top:16px;}
+                    .easydoge-action-title{border-top:5px solid rgba(148,163,184,1);border-top-left-radius:15px;border-top-right-radius:15px;padding:12px 16px;text-align:center;color:#111827;font-weight:800;background:rgba(17,24,39,.02);}
+                    .easydoge-x-grid{display:flex;gap:14px;justify-content:space-between;flex-wrap:wrap;padding:14px 16px 16px;}
+                    .easydoge-x-col{flex:1 1 240px;min-width:240px;}
+                    .easydoge-x-card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px;box-shadow:0 10px 22px rgba(0,0,0,.08);transition:transform .15s ease;overflow:hidden;}
+                    .easydoge-x-card:hover{transform:translateY(-1px);}
+                    .easydoge-x-inner{background-repeat:no-repeat;background-position:center left 15px;background-size:contain;text-align:center;margin:15px;}
+                </style>';
+
+                echo '<div class="easydoge-wrap">';
+
                 echo '<p style="text-align: center"><img style="margin:auto" src="'.plugins_url('/assets/wow.gif', __FILE__ ).'" alt="wow" /></p>';
-        
-                echo '<div class="row"><div style="border-top: 5px solid rgba(204, 153, 51, 1); border-top-left-radius: 15px; border-top-right-radius: 15px; padding: 10px">' . esc_html($this->instructions) . '</div><div class="col" style="float:none;margin:auto; text-align: center;max-width: 425px; border: 2px solid rgba(204, 153, 0, 1); border-radius: 15px; padding: 10px;"><div style="background-color: rgba(204, 153, 0, 1); padding: 10px; border-radius: 15px; border-bottom-left-radius: 0px; border-bottom-right-radius: 0px; text-align: center"><h2 style="font-size: 20px; color: rgba(0, 0, 0, 1); font-weight: bold">Ð '. esc_html($_GET['muchdoge']) . '</h2></div>';
-        
-                echo '<doge-qr address="' . esc_html($this->doge_address) . '" amount="' . esc_html($_GET['muchdoge']) . '" fill="#666,#000" img="https://fetch.dogecoin.org/resources/img/qr/so-coin.png"></doge-qr>';
-        
-                echo '<div style="background-color: rgba(204, 153, 0, 1); padding: 10px; border-radius: 15px; border-top-left-radius: 0px; border-top-right-radius: 0px; color: rgba(0, 0, 0, 1)">' . esc_html($this->doge_address) . '</div></div></div> ';
-        
-                if (trim($this->mydoge_x_user) != "" || trim($this->sodoge_x_user) != "") {
-                    echo '<div class="row" style="padding-top: 15px;"><div style="border-top: 5px solid  rgba(51, 153, 255, 1); border-top-left-radius: 15px; border-top-right-radius: 15px; padding: 10px"><div style="text-align: center;">'.__( 'Pay directly in Dogecoin using <b>X</b> Doge Wallet Bots!', 'easydoge-pay-woo').'</div>';
-                    echo '<div class="row">';
+
+                echo '<div class="easydoge-card">';
+                echo '<div class="easydoge-instructions">' . esc_html($this->instructions) . '</div>';
+                echo '<div class="easydoge-amount">Ð ' . esc_html($muchdoge) . '</div>';
+                echo '<div class="easydoge-qr"><doge-qr address="' . esc_html($this->doge_address) . '" amount="' . esc_html($muchdoge) . '" fill="#666,#000" img="https://fetch.dogecoin.org/resources/img/qr/so-coin.png"></doge-qr></div>';
+                echo '<div class="easydoge-address-row">';
+                echo '<div class="easydoge-address" id="easydoge-address">' . esc_html($this->doge_address) . '</div>';
+                echo '<button type="button" class="easydoge-copy-btn" data-address="' . esc_attr($this->doge_address) . '">' . esc_html__( 'Copy', 'easydoge-pay-woo' ) . '</button>';
+                echo '</div>';
+                echo '</div>'; // easydoge-card
+
+                // Button to open the native Dogecoin URI with the specified amount.
+                $doge_uri = 'dogecoin:' . rawurlencode( trim( (string) $this->doge_address ) ) . '?amount=' . rawurlencode( $muchdoge );
+                echo '<div style="padding:14px 16px 0; text-align:center;">';
+                echo '<a class="button easydoge-btn" href="' . esc_attr( $doge_uri ) . '">' . esc_html__( 'Pay in Doge', 'easydoge-pay-woo' ) . '</a>';
+                echo '</div>';
+
+                if ( trim( $this->mydoge_x_user ) != "" || trim( $this->sodoge_x_user ) != "" ) {
+                    echo '<div class="easydoge-x-section">';
+                    echo '<div class="easydoge-action-title">' . __( 'Pay directly in Dogecoin using <b>X</b> Doge Wallet Bots!', 'easydoge-pay-woo' ) . '</div>';
+                    echo '<div class="easydoge-x-grid">';
+
+                    if ( trim( $this->mydoge_x_user ) != "" ) {
+                        $mydoge_pay = "%0a%0a🥳🎉🐶🔥🚀%0a@MyDogeTip%20tip%20" . trim( $this->mydoge_x_user ) . "%20" . esc_html( $muchdoge ) . "%20Doge%20";
+                        $mydoge_wallet_link = 'https://x.com/intent/tweet?text=' . trim( $this->mydoge_x_user ) . '%20 XPay Order id:' . $order_id . $mydoge_pay . '%0a%0a' . get_site_url() . '%0a&hashtags=Doge,Dogecoin';
+                        echo '<div class="easydoge-x-col"><a href="' . esc_attr( $mydoge_wallet_link ) . '" target="_blank" rel="noopener noreferrer"><div class="easydoge-x-card"><div class="easydoge-x-inner" style="background-image:url(' . plugins_url('/assets/x.png', __FILE__ ) . ');"><img src="' . plugins_url('/assets/mydoge.png', __FILE__ ) . '" style="padding: 10px; display: inline; max-height: 50px" alt="MyDoge" /></div></div></a></div>';
+                    }
+
+                    if ( trim( $this->sodoge_x_user ) != "" ) {
+                        $sodoge_pay = "%0a%0a🥳🎉🐶🔥🚀%0a@sodogetip%20tip%20" . trim( $this->sodoge_x_user ) . "%20" . esc_html( $muchdoge ) . "%20Doge%20";
+                        $sodoge_wallet_link = 'https://x.com/intent/tweet?text=' . trim( $this->sodoge_x_user ) . '%20 XPay Order id:' . $order_id . $sodoge_pay . '%0a%0a' . get_site_url() . '%0a&hashtags=Doge,Dogecoin';
+                        echo '<div class="easydoge-x-col"><a href="' . esc_attr( $sodoge_wallet_link ) . '" target="_blank" rel="noopener noreferrer"><div class="easydoge-x-card"><div class="easydoge-x-inner" style="background-image:url(' . plugins_url('/assets/x.png', __FILE__ ) . ');"><img src="' . plugins_url('/assets/sodoge.png', __FILE__ ) . '" style="padding: 10px; display: inline; max-height: 50px" alt="SoDoge" /></div></div></a></div>';
+                    }
+
+                    echo '</div>'; // easydoge-x-grid
+                    echo '</div>'; // easydoge-x-section
                 }
-        
-                if (trim($this->mydoge_x_user) != "") {
-                    $mydoge_pay = "%0a%0a🥳🎉🐶🔥🚀%0a@MyDogeTip%20tip%20".trim($this->mydoge_x_user)."%20".esc_html($_GET['muchdoge'])."%20Doge%20";
-                    $mydoge_wallet_link = 'https://x.com/intent/tweet?text='.trim($this->mydoge_x_user).'%20 XPay Order id:'.$order_id.$mydoge_pay.'%0a%0a'.get_site_url().'%0a&hashtags=Doge,Dogecoin';
-                    echo '<div class="col" style="display:inline-block !important; width: 50%"><a href="'.$mydoge_wallet_link.'" target="_blank"><div style="background: #fff; border: 1px solid; border-radius: 15px; color: #000; background-image: url('.plugins_url('/assets/x.png', __FILE__ ).'); background-repeat: no-repeat; background-position: center left 15px; background-size: contain; text-align: center; margin:15px"><img src="'.plugins_url('/assets/mydoge.png', __FILE__ ).'" style="padding: 10px; display: inline; max-height: 50px"></div></a></div>';
-                }
-        
-                if (trim($this->sodoge_x_user) != "") {
-                    $sodoge_pay = "%0a%0a🥳🎉🐶🔥🚀%0a@sodogetip%20tip%20".trim($this->sodoge_x_user)."%20".esc_html($_GET['muchdoge'])."%20Doge%20";
-                    $sodoge_wallet_link = 'https://x.com/intent/tweet?text='.trim($this->sodoge_x_user).'%20 XPay Order id:'.$order_id.$sodoge_pay.'%0a%0a'.get_site_url().'%0a&hashtags=Doge,Dogecoin';
-                    echo '<div class="col" style="display:inline-block !important;width: 50%"><a href="'.$sodoge_wallet_link.'" target="_blank"><div style="background: #fff; border: 1px solid; border-radius: 15px; color: #000; background-image: url('.plugins_url('/assets/x.png', __FILE__ ).'); background-repeat: no-repeat; background-position: center left 15px; background-size: contain; text-align: center; margin:15px"><img src="'.plugins_url('/assets/sodoge.png', __FILE__ ).'" style="padding: 10px; display: inline; max-height: 50px"></div></a></div>';
-                }
-        
-                if (trim($this->mydoge_x_user) != "" || trim($this->sodoge_x_user) != "") {
-                    echo '</div></div></div>';
-                }
+
+                // Small helper to copy DOGE address.
+                echo '<script>
+                    (function(){
+                        var btn = document.querySelector(".easydoge-copy-btn");
+                        if(!btn) return;
+                        btn.addEventListener("click", async function(){
+                            var addr = btn.getAttribute("data-address") || "";
+                            try{
+                                if(navigator.clipboard && navigator.clipboard.writeText){
+                                    await navigator.clipboard.writeText(addr);
+                                }else{
+                                    var ta = document.createElement("textarea");
+                                    ta.value = addr;
+                                    document.body.appendChild(ta);
+                                    ta.select();
+                                    document.execCommand("copy");
+                                    document.body.removeChild(ta);
+                                }
+                                btn.textContent = "Copied";
+                                setTimeout(function(){ btn.textContent = "' . esc_js( __( 'Copy', 'easydoge-pay-woo' ) ) . '"; }, 1200);
+                            }catch(e){
+                                alert(addr);
+                            }
+                        });
+                    })();
+                </script>';
+
+                echo '</div>'; // easydoge-wrap
         
                 $order->payment_complete();
                 $order->update_status( 'on-hold',  __( 'Awaiting Dogecoin Payment Confirmation', 'easydoge-pay-woo') );
