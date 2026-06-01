@@ -3,8 +3,8 @@ Contributors: inevitable360
 Donate link: https://x.com/inevitable360
 Tags: dogecoin, woocommerce, payments, cryptocurrency, gateway
 Requires at least: 5.6
-Tested up to: 6.9.4
-Stable tag: 69.420.9
+Tested up to: 7.0
+Stable tag: 69.420.10
 Requires PHP: 7.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -14,7 +14,7 @@ Accept Dogecoin payments in WooCommerce using your own Dogecoin address. No paym
 
 == Description ==
 
-Accept Dogecoin Payments simply by using your Dogecoin Address or your X account connected to the MyDoge.com or sodogetip.xyz Wallets without the need of any third party payment processor, banks or extra fees. Your store, your wallet, your Doge.
+Accept Dogecoin Payments simply by using your Dogecoin Address without the need of any third party payment processor, banks or extra fees. Your store, your wallet, your Doge.
 It uses the Google API to generate QR Codes and the CoinGecko API to convert Fiat into Dogecoin current value.
 
 == Frequently Asked Questions ==
@@ -40,6 +40,11 @@ You can mine Doge using an ASIC computer or you can buy Doge with Fiat money (Do
 1. Dogecoin Payment option screenshot-1.png
 
 == Changelog ==
+
+= 69.420.10 =
+* Removed MyDoge and SoDogeTip X payment options.
+* Switched gateway icon from icon.svg to icon.png.
+* Tested with WordPress 7.0 and WooCommerce 10.8.1.
 
 = 69.420.9 =
 * Fixed PHP 8.2 deprecation warnings by declaring previously dynamic properties.
